@@ -5,124 +5,151 @@
 ![OpenCV](https://img.shields.io/badge/OpenCV-Face%20Detection-red?logo=opencv&logoColor=white)
 ![SQLite](https://img.shields.io/badge/SQLite-Database-lightgrey?logo=sqlite&logoColor=white)
 
-A comprehensive Endpoint Security Platform designed to prevent unauthorized data access, encrypt files in transit, and monitor endpoints through a Security Operations Center (SOC) server.
+NEXUS Secure DLP is an enterprise-grade Endpoint Security and Data Loss Prevention platform. It is engineered to prevent unauthorized data exfiltration, ensure cryptographic file integrity in transit, and provide a centralized Security Operations Center (SOC) for continuous endpoint monitoring, auditing, and automated threat response.
 
-## 🏗️ Project Architecture
+## 🏗️ System Architecture
 
 ```mermaid
 graph TD;
-    subgraph Endpoint [Employee Device]
-        A[NEXUS Agent Daemon] -->|Auto-Encrypts Files| B(.ndlp Packages)
-        A -->|Sends Heartbeats & Logs| C[SOC Server]
-        D[Webcam] -->|Captures Intruder| A
-        E[NEXUS Decrypt GUI] -->|Requests Decryption Key| C
-        E -->|Decrypts| B
+    subgraph Endpoint Layer [Employee Devices]
+        A[NEXUS Endpoint Agent] -->|AES-256 Auto-Encryption| B(NDLP Encrypted Packages)
+        A -->|Continuous Telemetry & Heartbeats| C[SOC Backend]
+        D[Hardware Interfaces / Webcam] -->|Captures Unauthorized Actors| A
     end
     
-    subgraph Server [Security Operations Center]
-        C -->|Validates Dept Password| F[(SQLite DB)]
-        C -->|Logs Events| G[Blockchain Logs]
-        C -->|Sends Email Alerts| H[Admin Email]
+    subgraph Application Layer [Decryption Client]
+        E[NEXUS Decrypt Application] -->|Requests Cryptographic Key| C
+        E -->|Executes Decryption| B
+    end
+    
+    subgraph Server Layer [Security Operations Center]
+        C -->|Zero-Trust Validation| F[(Relational Database)]
+        C -->|Immutable Audit Trails| G[Distributed Logs]
+        C -->|Incident Escalation| H[Administrator Alerts]
     end
 ```
 
-The project is split into three main components:
+The NEXUS architecture is built on a robust, multi-layered security model:
 
-### 1. NEXUS Agent (`nexus_agent/`)
-A background daemon running continuously on the endpoint (e.g., employee laptop).
-- **Auto-Monitoring:** Watches designated folders (Desktop, Documents, Downloads, USB drives) and auto-encrypts sensitive files.
-- **Intruder Capture:** Utilizes webcam hardware to capture unauthorized access attempts using OpenCV face detection.
-- **Telemetry:** Sends real-time heartbeats and security events (NORMAL, MEDIUM, HIGH) to the SOC server.
+### 1. Endpoint Layer (`nexus_agent/`)
+A lightweight, high-performance background daemon deployed across employee endpoints.
+- **Continuous File Monitoring:** Actively watches critical directories and USB volumes, instantly encrypting exposed sensitive assets.
+- **Device Control & Telemetry:** Establishes secure websocket/HTTP connections to transmit system heartbeats, telemetry, and security events.
+- **Hardware Integration:** Interfaces with native webcam drivers to capture visual evidence of unauthorized access attempts.
 
-### 2. NEXUS Decrypt App (`user_app/`)
-A premium Desktop GUI application (built with pywebview and HTML/CSS/JS) for authorized users to decrypt files.
-- **Secure File Handling:** Select and decrypt `.ndlp` (NEXUS Data Loss Prevention) packages.
-- **Server Authentication:** Communicates securely with the SOC server to validate passwords and obtain decryption keys (`Fernet` AES-256).
+### 2. Application Layer (`user_app/`)
+A secure, sandboxed Desktop GUI application providing authorized personnel with seamless file access.
+- **Cryptographic Operations:** Handles the secure decoding and reconstruction of `.ndlp` (NEXUS Data Loss Prevention) archives.
+- **Identity Verification:** Interfaces with the SOC Backend to negotiate decryption keys via strict password and token validation.
 
-### 3. NEXUS SOC Server (`server/`)
-A centralized Security Operations Center (SOC) Flask backend to monitor and manage all endpoints.
-- **Dashboard:** Real-time web UI showing event telemetry, active endpoints, and threat analytics.
-- **Access Management:** Admins can authorize, block, or revoke endpoints.
-- **Immutable Logging:** Stores a blockchain-style log of all security events.
-- **Key Management:** Generates and distributes decryption keys based on department password verification.
-- **Alerts:** Triggers immediate email notifications with webcam attachments for HIGH severity threats.
+### 3. Server Layer (`server/`)
+The centralized Security Operations Center (SOC) backend governing the entire deployment.
+- **SOC Dashboard:** A real-time command center for threat analytics, active endpoint tracking, and incident response.
+- **Access Management System:** Provides granular administrative controls to authorize, quarantine, or permanently block endpoint devices.
+- **Key Management Service (KMS):** Securely generates, stores, and issues AES-256 `Fernet` keys based on strict department-level authorization checks.
 
-## 🚀 Quick Start
+### 4. Data & Audit Layer (`server/data/`)
+- **Immutable Logging:** Maintains a blockchain-inspired, tamper-evident chronological ledger of all network and file events.
+- **Relational Database:** Securely stores hashed credentials (`SHA-256`) and department policies.
+
+---
+
+## 🛡️ Core Security Capabilities
+
+### Security & Identity Layer
+- **Authentication:** Zero-trust device enrollment and session validation.
+- **Authorization:** Department-based Access Control (RBAC) ensuring users only decrypt files within their clearance.
+- **Encryption Engine:** Utilizes AES-256 symmetric encryption via the `cryptography.fernet` framework.
+- **Integrity Validation:** Cryptographic hashing prevents `.ndlp` package tampering.
+
+### Monitoring & Detection Layer
+- **Intrusion Detection:** Heuristics to detect brute-force attempts and invalid decryption passwords.
+- **Visual Forensics:** Covert webcam capture system activated instantly upon unauthorized access.
+- **Real-Time Tracking:** Sub-second logging of file state changes and data movements.
+
+### Alert & Incident Response Layer
+- **Severity Classification:** Automated triage assigning LOW, MEDIUM, or HIGH severity scores to all telemetry.
+- **Automated Escalation:** Immediate dispatch of SMTP email alerts complete with forensic photo attachments for HIGH-severity incidents.
+
+---
+
+## 🔒 Threat Mitigation Workflow
+
+```mermaid
+sequenceDiagram
+    participant User as End User
+    participant Agent as Endpoint Agent
+    participant GUI as Decrypt Application
+    participant Server as SOC Backend
+
+    Note over User,Agent: 1. Zero-Touch Encryption Pipeline
+    User->>Agent: Deposits sensitive file in watched directory
+    Agent->>Server: Requests KMS Encryption Key (Asset ID + Dept Signature)
+    Server-->>Agent: Issues AES-256 Fernet Key
+    Agent->>Agent: Encrypts asset into secure .ndlp archive
+    Agent->>Server: Transmits success telemetry
+
+    Note over User,Server: 2. Authorized Decryption Protocol
+    User->>GUI: Opens .ndlp and submits credential
+    GUI->>Server: Submits verification request (Credential + Asset ID)
+    Server->>Server: Performs SHA-256 hash validation
+    Server-->>GUI: Issues temporary Decryption Key
+    GUI->>GUI: Restores original asset
+
+    Note over User,Server: 3. Active Intrusion Response
+    User->>GUI: Submits INVALID credential
+    GUI->>Server: Submits verification request
+    Server-->>GUI: 403 Forbidden (Access Denied)
+    GUI->>GUI: Covertly engages webcam & captures forensics
+    GUI->>Server: Transmits visual evidence + HIGH severity incident log
+    Server->>Server: Escalates via Email to SOC Administrators
+```
+
+### Flow Breakdown
+1. **Encryption Flow:** Files dropped into secured zones are instantly detected. The agent negotiates a symmetric key with the SOC KMS and encrypts the payload, preventing data leaks via USB or unauthorized transfer.
+2. **Decryption Flow:** Authorized personnel use the Decrypt Application to authenticate. Upon successful SOC validation, the temporary key is injected into memory to restore the file.
+3. **Unauthorized Access Handling:** Failed authentications are treated as active threats. The client is denied access while simultaneously capturing visual forensics and reporting the breach to the SOC.
+4. **Logging & Alert Pipeline:** The SOC logs the breach into the immutable ledger and dispatches an emergency email alert to administrators containing the incident details and intruder photograph.
+
+---
+
+## 📈 Scalability & Deployment
+NEXUS Secure DLP is built with a highly modular, decoupled architecture. The Flask-based SOC Backend and lightweight Python agents are designed to scale effortlessly, supporting deployments from a single sensitive workstation to hundreds of distributed enterprise endpoints.
+
+---
+
+## 🚀 Quick Start Guide
 
 ### Prerequisites
 - Python 3.10+
 - Virtual Environment
 
-### 1. Run the Server
-Ensure you are using the correct network IP or `localhost` if running locally.
+### 1. Initialize SOC Backend
 ```bash
-# From the project root
 source .venv/bin/activate
 cd server
 python server.py
 ```
-> The dashboard will be available at `http://127.0.0.1:5050`. Default Admin Password: `Arnab@2026`
+> **SOC Dashboard:** `http://127.0.0.1:5050` | **Default Admin Password:** `Arnab@2026`
 
-### 2. Run the Endpoint Agent
-The agent runs in the background and secures the host machine.
+### 2. Deploy Endpoint Agent
 ```bash
-# From the project root
 source .venv/bin/activate
 cd nexus_agent
 python main.py
 ```
 
-### 3. Run the Decrypt GUI
-The end-user application to decrypt `.ndlp` packages.
+### 3. Launch Decrypt Application
 ```bash
-# From the project root
 source .venv/bin/activate
 cd user_app
 python app.py
 ```
 
-## 🔒 Security Workflow
-
-```mermaid
-sequenceDiagram
-    participant User
-    participant Agent as NEXUS Agent
-    participant GUI as Decrypt GUI
-    participant Server as SOC Server
-
-    Note over User,Agent: File Encryption
-    User->>Agent: Drops file in Monitored Folder
-    Agent->>Server: Request Encryption Key (File + Dept Signature)
-    Server-->>Agent: Returns AES-256 Fernet Key
-    Agent->>Agent: Encrypts file -> .ndlp
-    Agent->>Server: Log success event
-
-    Note over User,Server: File Decryption (Authorized)
-    User->>GUI: Opens .ndlp & enters Password
-    GUI->>Server: Request Decryption Key (Password + .ndlp)
-    Server->>Server: Validates Password Hash
-    Server-->>GUI: Returns Decryption Key
-    GUI->>GUI: Decrypts and opens original file
-    
-    Note over User,Server: Unauthorized Decryption
-    User->>GUI: Enters INVALID Password
-    GUI->>Server: Request Decryption Key
-    Server-->>GUI: 403 Forbidden
-    GUI->>GUI: Silently captures Webcam Image
-    GUI->>Server: Upload Intrusion Image + HIGH Alert Log
-    Server->>Server: Sends Email Alert with Photo to Admin
-```
-
-1. A file is created in a monitored folder. The `nexus_agent` automatically detects it and requests encryption.
-2. The `server` generates an AES-256 `Fernet` key based on the file's department signature and returns it.
-3. The agent encrypts the file into an `.ndlp` package and drops the original.
-4. When a user tries to decrypt it via the `user_app` GUI, they must provide the correct department password.
-5. If the password is wrong, access is denied (403), the webcam silently captures an image of the user, and an email alert is sent to the administrator.
-
-## ⚙️ Environment Variables (Server)
-To enable full server functionality, set the following environment variables:
+### ⚙️ Server Configuration
+Configure the `.env` variables to enable the full Alert & Response layer:
 - `EMAIL_ENABLED=true`
-- `EMAIL_SENDER=your_email@gmail.com`
-- `EMAIL_PASSWORD=your_app_password`
-- `EMAIL_RECEIVER=recipient_email@gmail.com`
-- `SECRET_KEY=your_flask_secret_key`
+- `EMAIL_SENDER=security@yourdomain.com`
+- `EMAIL_PASSWORD=your_smtp_app_password`
+- `EMAIL_RECEIVER=soc_admin@yourdomain.com`
+- `SECRET_KEY=your_secure_flask_key`
