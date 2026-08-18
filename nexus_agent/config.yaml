@@ -1,0 +1,61 @@
+# =============================================================
+# NEXUS Endpoint Agent — Configuration
+# =============================================================
+# Edit this file to customize agent behavior.
+# Environment variables override values here (prefix: NEXUS_).
+# =============================================================
+
+server:
+  url: "http://127.0.0.1:5050"
+  timeout_seconds: 20
+
+device:
+  # Auto-detected at startup if left empty
+  name: ""
+
+admin:
+  email: ""
+
+encryption:
+  algorithm: "AES-256-Fernet"
+
+monitoring:
+  watch_paths:
+    - "~/Desktop"
+    - "~/Documents"
+    - "~/Downloads"
+  file_extensions:
+    - ".pdf"
+    - ".docx"
+    - ".xlsx"
+    - ".pptx"
+    - ".txt"
+    - ".csv"
+    - ".jpg"
+    - ".jpeg"
+    - ".png"
+    - ".zip"
+    - ".rar"
+  recursive: true
+  poll_interval_seconds: 1
+  auto_encrypt_on_usb: true
+  auto_encrypt_on_local: true
+
+heartbeat:
+  interval_seconds: 60
+
+event_queue:
+  max_retries: 5
+  retry_delay_seconds: 10
+  batch_size: 25
+
+intruder_capture:
+  enabled: true
+  camera: "builtin"
+  max_attempts_before_block: 3
+
+logging:
+  level: "INFO"
+  file: "logs/nexus_agent.log"
+  max_bytes: 10485760  # 10 MB
+  backup_count: 5

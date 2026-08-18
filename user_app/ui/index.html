@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXUS Secure Decrypt</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    
+    <!-- Ambient Background Effects -->
+    <div class="ambient-glow cyan-glow"></div>
+    <div class="ambient-glow navy-glow"></div>
+    
+    <div class="app-container">
+        
+        <!-- Header -->
+        <header class="header">
+            <div class="logo-container">
+                <div class="lock-icon" id="lock-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                    </svg>
+                </div>
+                <div class="header-text">
+                    <h1 class="glow-text">NEXUS Secure Decrypt</h1>
+                    <p class="subtitle">ENTERPRISE DECRYPTION CLIENT</p>
+                </div>
+            </div>
+            <div class="status-badge" id="system-status">
+                <span class="pulse-dot"></span>
+                SYSTEM READY
+            </div>
+        </header>
+
+        <!-- Progress Tracker -->
+        <div class="progress-tracker">
+            <div class="step active" id="step-1-indicator">
+                <div class="step-circle">1</div>
+                <span>File Select</span>
+            </div>
+            <div class="progress-line">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+            <div class="step" id="step-2-indicator">
+                <div class="step-circle">2</div>
+                <span>Authentication</span>
+            </div>
+        </div>
+
+        <main class="main-content">
+            
+            <!-- Step 1: File Selection -->
+            <div class="glass-card section-card" id="step-1-card">
+                <div class="card-header">
+                    <h2>01. Target File</h2>
+                    <p>Select an encrypted .ndlp package to begin.</p>
+                </div>
+                
+                <div class="file-drop-zone" id="file-drop-zone">
+                    <div class="file-details" id="file-details" style="display: none; justify-content: space-between; align-items: center;">
+                        <div style="display: flex; align-items: center; gap: 16px;">
+                            <div class="file-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
+                                    <polyline points="13 2 13 9 20 9"></polyline>
+                                </svg>
+                            </div>
+                            <div class="file-info">
+                                <h3 id="file-name">filename.ndlp</h3>
+                                <div class="metadata">
+                                    <span class="tag" id="file-size">0 KB</span>
+                                    <span class="tag" id="file-dept">Dept: Unknown</span>
+                                    <span class="tag secure">AES-256</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="btn-outline" id="btn-change-file" style="padding: 8px 12px; font-size: 11px;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px; height:14px;">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="17 8 12 3 7 8"></polyline>
+                                <line x1="12" y1="3" x2="12" y2="15"></line>
+                            </svg>
+                            Change File
+                        </button>
+                    </div>
+                    
+                    <button class="btn-outline" id="btn-browse">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                        Browse System
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 2: Authentication -->
+            <div class="glass-card section-card disabled" id="step-2-card">
+                <div class="card-header">
+                    <h2>02. Access Token</h2>
+                    <p>Enter the master password to decrypt this package.</p>
+                </div>
+                
+                <div class="auth-input-group">
+                    <div class="input-wrapper">
+                        <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                        </svg>
+                        <input type="password" id="auth-token" placeholder="Enter secure password" disabled>
+                        <button class="toggle-password" id="btn-toggle-password" tabindex="-1">
+                            <svg class="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="error-msg" id="auth-error"></div>
+                </div>
+            </div>
+
+        </main>
+        
+        <!-- Action Footer -->
+        <footer class="footer">
+            <button class="btn-primary" id="btn-decrypt" disabled>
+                <span class="btn-text">INITIALIZE DECRYPTION</span>
+                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                    <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
+                <div class="spinner" style="display: none;"></div>
+            </button>
+        </footer>
+
+        <!-- Success Overlay -->
+        <div class="success-overlay" id="success-overlay" style="display: none;">
+            <div class="success-card glass-card">
+                <div class="success-icon-container">
+                    <svg class="success-check" viewBox="0 0 24 24" fill="none" stroke="#00FFA3" stroke-width="2">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                </div>
+                <h2>Decryption Complete</h2>
+                <p id="success-message">File has been securely extracted.</p>
+                <button class="btn-outline" id="btn-restart">DECRYPT ANOTHER FILE</button>
+            </div>
+        </div>
+        
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

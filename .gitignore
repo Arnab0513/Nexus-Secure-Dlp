@@ -1,0 +1,29 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+.mypy_cache/
+
+# Environments
+.venv/
+venv/
+ENV/
+env/
+
+# Database and Server Data
+server/data/
+nexus_agent/data/
+nexus_agent/logs/
+nexus_agent/captures/
+nexus_agent/nexus_agent.pid
+*.sqlite3
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# User App Data
+*.ndlp
+*.log

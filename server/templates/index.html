@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NEXUS SOC Dashboard</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body>
+
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar">
+    <div class="brand">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#818CF8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+      </svg>
+      <span>NEXUS SOC</span>
+    </div>
+
+    <div class="nav-section">
+      <button class="nav-item active" onclick="switchTab('logs', this)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        <span>Event Log</span>
+      </button>
+      <button class="nav-item" onclick="switchTab('analytics', this)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        <span>Analytics</span>
+      </button>
+      <button class="nav-item" onclick="switchTab('blocked', this)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+        <span>Blocked</span>
+      </button>
+      <button class="nav-item" onclick="switchTab('devices', this)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        <span>Device Control</span>
+      </button>
+    </div>
+
+    <div class="sidebar-footer">
+      <a class="logout-link" href="/logout">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        <span>Logout</span>
+      </a>
+    </div>
+  </aside>
+
+  <!-- ── Main ── -->
+  <main class="main">
+
+    <!-- Top Header -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <h1 id="tabTitle">Event Log</h1>
+        <span id="liveBadge" class="live-badge">
+          <span id="liveDot" class="pulse-dot disconnected"></span>
+          <span id="liveText">Connecting...</span>
+        </span>
+      </div>
+      <div class="topbar-right">
+        <button class="btn btn-ghost" id="themeToggle" onclick="toggleTheme()" title="Toggle Day/Night Mode">
+          <svg id="themeIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Default to Sun icon -->
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+        </button>
+        <button class="btn btn-ghost" onclick="exportCSV()" title="Export as CSV">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export
+        </button>
+        <button class="btn btn-danger" onclick="clearLogs()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          Clear Logs
+        </button>
+      </div>
+    </header>
+
+    <!-- Scrollable Content -->
+    <div class="content">
+
+      <!-- Stats -->
+      <div class="stats-grid">
+        <div class="metric-card">
+          <div class="label">Total Events</div>
+          <div class="value" id="statTotal">0</div>
+          <div class="sub">All activity</div>
+        </div>
+        <div class="metric-card high">
+          <div class="label">High Severity</div>
+          <div class="value" id="statHigh">0</div>
+          <div class="sub">Critical alerts</div>
+        </div>
+        <div class="metric-card" style="--v-color: var(--accent)">
+          <div class="label">Medium Severity</div>
+          <div class="value" id="statMedium">0</div>
+          <div class="sub">Warnings</div>
+        </div>
+        <div class="metric-card ok">
+          <div class="label">Normal Activity</div>
+          <div class="value" id="statNormal">0</div>
+          <div class="sub">Routine events</div>
+        </div>
+        <div class="metric-card">
+          <div class="label">Authorized Agents</div>
+          <div class="value" id="statAuth">0</div>
+          <div class="sub">Active endpoints</div>
+        </div>
+      </div>
+
+      <!-- ── Tab: Event Log ── -->
+      <section id="tab-logs" class="tab-panel active">
+        <div class="search-bar" style="max-width:100%;margin-bottom:12px">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input id="searchInput" placeholder="Search events by device, IP, or action..." oninput="filterRows()" />
+        </div>
+
+        <div class="filter-pills">
+          <button class="pill active" onclick="setPill(this, '')">All</button>
+          <button class="pill" onclick="setPill(this, 'HIGH')">High Severity</button>
+          <button class="pill" onclick="setPill(this, 'MEDIUM')">Medium</button>
+          <button class="pill" onclick="setPill(this, 'NORMAL')">Normal</button>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Timestamp</th>
+                <th>Device</th>
+                <th>IP Address</th>
+                <th>Target File</th>
+                <th>Action</th>
+                <th>Severity</th>
+                <th>Block Hash</th>
+              </tr>
+            </thead>
+            <tbody id="logBody">
+              {% for block in logs|reverse %}
+              <tr data-severity="{{ block.data.severity }}">
+                <td class="mono">{{ block.timestamp }}</td>
+                <td><b>{{ block.data.device }}</b></td>
+                <td class="mono">{{ block.data.ip }}</td>
+                <td class="mono">{{ block.data.file }}</td>
+                <td>{{ block.data.action }}</td>
+                <td><span class="badge badge-{{ block.data.severity }}">{{ block.data.severity }}</span></td>
+                <td class="mono" title="{{ block.hash }}">{{ block.hash[:12] }}…</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="pagination" id="pagination"></div>
+      </section>
+
+      <!-- ── Tab: Analytics ── -->
+      <section id="tab-analytics" class="tab-panel">
+        <div class="grid-two">
+          <div class="panel-card">
+            <h3>Severity Breakdown</h3>
+            <div id="severitySummary"></div>
+          </div>
+          <div class="panel-card">
+            <h3>Recent Decryption Attempts</h3>
+            <div id="attemptList"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Tab: Blocked ── -->
+      <section id="tab-blocked" class="tab-panel">
+        <div class="panel-card">
+          <h3>Blocked Devices</h3>
+          <div id="blockedList"></div>
+        </div>
+      </section>
+
+      <!-- ── Tab: Device Control ── -->
+      <section id="tab-devices" class="tab-panel">
+        <div class="grid-two">
+          <div class="panel-card">
+            <h3>Authorize Endpoint</h3>
+            <input class="input-field" id="authDevice" placeholder="Endpoint / Device Name" />
+            <input class="input-field" id="authIp"     placeholder="IP address (or *)" />
+            <input class="input-field" id="authOwner"  placeholder="Owner / Administrator Note" />
+            <button class="btn btn-primary" onclick="authorizeDevice()" style="width:100%;justify-content:center;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              Authorize Endpoint
+            </button>
+          </div>
+          <div class="panel-card">
+            <h3>Authorized Endpoints</h3>
+            <div id="authorizedList"></div>
+          </div>
+        </div>
+      </section>
+
+    </div><!-- /content -->
+  </main>
+
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

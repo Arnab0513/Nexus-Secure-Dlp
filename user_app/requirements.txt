@@ -1,0 +1,4 @@
+requests
+cryptography
+pyyaml
+opencv-python

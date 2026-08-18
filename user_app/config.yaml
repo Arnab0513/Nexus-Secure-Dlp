@@ -1,0 +1,3 @@
+# Minimal config for the NEXUS Decrypt user app.
+# Only the server URL is needed — the app talks directly to the SOC server API.
+server_url: "http://127.0.0.1:5050"

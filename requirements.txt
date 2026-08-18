@@ -1,0 +1,7 @@
+Flask==3.1.0
+cryptography==44.0.0
+requests==2.32.3
+opencv-python==4.11.0.86
+opencv-contrib-python==4.11.0.86
+watchdog==6.0.0
+numpy==2.2.4
