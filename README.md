@@ -1,8 +1,30 @@
 # NEXUS Secure DLP (Data Loss Prevention)
 
+![Python](https://img.shields.io/badge/Python-3.10%2B-blue?logo=python&logoColor=white)
+![Flask](https://img.shields.io/badge/Flask-Backend-green?logo=flask&logoColor=white)
+![OpenCV](https://img.shields.io/badge/OpenCV-Face%20Detection-red?logo=opencv&logoColor=white)
+![SQLite](https://img.shields.io/badge/SQLite-Database-lightgrey?logo=sqlite&logoColor=white)
+
 A comprehensive Endpoint Security Platform designed to prevent unauthorized data access, encrypt files in transit, and monitor endpoints through a Security Operations Center (SOC) server.
 
 ## 🏗️ Project Architecture
+
+```mermaid
+graph TD;
+    subgraph Endpoint [Employee Device]
+        A[NEXUS Agent Daemon] -->|Auto-Encrypts Files| B(.ndlp Packages)
+        A -->|Sends Heartbeats & Logs| C[SOC Server]
+        D[Webcam] -->|Captures Intruder| A
+        E[NEXUS Decrypt GUI] -->|Requests Decryption Key| C
+        E -->|Decrypts| B
+    end
+    
+    subgraph Server [Security Operations Center]
+        C -->|Validates Dept Password| F[(SQLite DB)]
+        C -->|Logs Events| G[Blockchain Logs]
+        C -->|Sends Email Alerts| H[Admin Email]
+    end
+```
 
 The project is split into three main components:
 
@@ -60,6 +82,37 @@ python app.py
 ```
 
 ## 🔒 Security Workflow
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Agent as NEXUS Agent
+    participant GUI as Decrypt GUI
+    participant Server as SOC Server
+
+    Note over User,Agent: File Encryption
+    User->>Agent: Drops file in Monitored Folder
+    Agent->>Server: Request Encryption Key (File + Dept Signature)
+    Server-->>Agent: Returns AES-256 Fernet Key
+    Agent->>Agent: Encrypts file -> .ndlp
+    Agent->>Server: Log success event
+
+    Note over User,Server: File Decryption (Authorized)
+    User->>GUI: Opens .ndlp & enters Password
+    GUI->>Server: Request Decryption Key (Password + .ndlp)
+    Server->>Server: Validates Password Hash
+    Server-->>GUI: Returns Decryption Key
+    GUI->>GUI: Decrypts and opens original file
+    
+    Note over User,Server: Unauthorized Decryption
+    User->>GUI: Enters INVALID Password
+    GUI->>Server: Request Decryption Key
+    Server-->>GUI: 403 Forbidden
+    GUI->>GUI: Silently captures Webcam Image
+    GUI->>Server: Upload Intrusion Image + HIGH Alert Log
+    Server->>Server: Sends Email Alert with Photo to Admin
+```
+
 1. A file is created in a monitored folder. The `nexus_agent` automatically detects it and requests encryption.
 2. The `server` generates an AES-256 `Fernet` key based on the file's department signature and returns it.
 3. The agent encrypts the file into an `.ndlp` package and drops the original.
