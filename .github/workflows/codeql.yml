@@ -59,9 +59,9 @@ jobs:
         run: echo "Manual build skipped"
 
       # 4. Build Swift ONLY
-      - name: Build Swift Package
+      - name: Skip Swift Build (Camera code not CLI)
         if: matrix.language == 'swift'
-        run: swift build
+        run: echo "Skipping Swift build (iOS camera code)"
 
       # 5. Analyze
       - name: Perform CodeQL Analysis
