@@ -1,10 +1,9 @@
 import Foundation
 
-// Dummy wrapper so CodeQL can build
-struct CameraTest {
-    func run() {
+public struct CameraTest {
+    public init() {}
+
+    public func run() {
         print("Camera module placeholder")
     }
 }
-
-CameraTest().run()
